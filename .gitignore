@@ -1,0 +1,7 @@
+.vs/
+**/bin/
+**/obj/
+.dotnet/
+*.user
+*.db
+*.db-*
