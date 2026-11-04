@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace DepartmentKiosk
+namespace MallWay
 {
     public sealed class KioskSettings
     {

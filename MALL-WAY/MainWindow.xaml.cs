@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace DepartmentKiosk
+namespace MallWay
 {
     public partial class MainWindow : Window
     {

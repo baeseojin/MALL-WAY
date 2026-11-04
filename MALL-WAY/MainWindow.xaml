@@ -1,4 +1,4 @@
-<Window x:Class="DepartmentKiosk.MainWindow"
+<Window x:Class="MallWay.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding MallName}" Width="1280" Height="760" MinWidth="960" MinHeight="600"
@@ -38,7 +38,7 @@
                     </Border>
                     <TextBlock Text="{Binding KioskFloorLabel}" Foreground="#C4D8EA" Margin="0,3,0,0" />
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Bottom" Text="ARON DEPARTMENT STORE" Foreground="#93B5D2" FontSize="11" />
+                <TextBlock DockPanel.Dock="Bottom" Text="MALL-WAY" Foreground="#93B5D2" FontSize="11" />
             </DockPanel>
         </Border>
 

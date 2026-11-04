@@ -1,12 +1,14 @@
-# 아르온 백화점 키오스크
+# MALL-WAY
+
+## 아르온 백화점 키오스크
 
 Windows x64에서 실행하는 WPF · .NET Framework 4.8 프로젝트입니다.
 
 ## 실행
 
-Visual Studio에서 `DepartmentKiosk.sln`을 열고 .NET 데스크톱 개발 워크로드와 .NET Framework 4.8 개발자 팩을 설치한 환경에서 F5를 누릅니다. 명령줄에서는 `dotnet build DepartmentKiosk.sln`으로 빌드할 수 있습니다.
+Visual Studio에서 `MALL-WAY.sln`을 열고 .NET 데스크톱 개발 워크로드와 .NET Framework 4.8 개발자 팩을 설치한 환경에서 F5를 누릅니다. 명령줄에서는 `dotnet build MALL-WAY.sln`으로 빌드할 수 있습니다.
 
-Debug 빌드의 실행 파일은 `DepartmentKiosk/bin/Debug/net48/win-x64/DepartmentKiosk.exe`입니다. 다른 폴더에서 시연할 때는 설정과 라이브러리를 포함한 출력 폴더 전체를 복사합니다. 첫 실행에는 출력 폴더에 쓸 수 있어야 합니다.
+Debug 빌드의 실행 파일은 `MALL-WAY/bin/Debug/net48/win-x64/MALL-WAY.exe`입니다. 다른 폴더에서 시연할 때는 설정과 라이브러리를 포함한 출력 폴더 전체를 복사합니다. 첫 실행에는 출력 폴더에 쓸 수 있어야 합니다.
 
 ## 수요일 구현
 
