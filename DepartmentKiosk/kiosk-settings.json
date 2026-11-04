@@ -1,0 +1,6 @@
+{
+  "mallName": "아르온 백화점",
+  "databasePath": "Data/department.db",
+  "startNodeId": "1-kiosk",
+  "defaultFloor": 1
+}
