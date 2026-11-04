@@ -1,6 +1,6 @@
 using GalaSoft.MvvmLight;
 
-namespace DepartmentKiosk
+namespace MallWay
 {
     public sealed class MainViewModel : ViewModelBase
     {

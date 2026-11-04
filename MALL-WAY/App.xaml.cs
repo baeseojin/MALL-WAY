@@ -3,7 +3,7 @@ using System.Windows;
 using CommonServiceLocator;
 using GalaSoft.MvvmLight.Ioc;
 
-namespace DepartmentKiosk
+namespace MallWay
 {
     public partial class App : Application
     {
