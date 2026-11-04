@@ -1,4 +1,6 @@
-# 아르온 백화점 키오스크
+# MALL-WAY
+
+## 아르온 백화점 키오스크
 
 Windows x64에서 실행하는 WPF · .NET Framework 4.8 프로젝트입니다.
 
