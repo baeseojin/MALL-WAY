@@ -88,7 +88,7 @@ namespace MallWay
 
         private static List<string> BuildInstructions(RouteResult route)
         {
-            var instructions = new List<string> { $"{route.Start.Label}에서 출발합니다." };
+            var instructions = new List<string>();
             for (var index = 0; index < route.Steps.Count; index++)
             {
                 var step = route.Steps[index];
@@ -104,10 +104,10 @@ namespace MallWay
                 {
                     last = route.Steps[++index].To;
                 }
-                instructions.Add($"{step.From.Floor}층 {step.From.Label}까지 이동한 뒤 탑승 → {last.Floor}층에서 하차하세요.");
+                instructions.Add($"{step.From.Floor}F {step.From.Label} 탑승 → {last.Floor}F 하차");
             }
-            instructions.Add($"{route.Destination.Floor}층 지도에 표시된 경로를 따라 {route.Destination.Label}까지 이동하세요.");
-            return instructions.Select((text, index) => $"{index + 1}. {text}").ToList();
+            instructions.Add($"{route.Destination.Floor}F {route.Destination.Label} 도착");
+            return instructions;
         }
     }
 
