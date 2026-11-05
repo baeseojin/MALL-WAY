@@ -10,6 +10,13 @@ Visual Studio에서 `MALL-WAY.sln`을 열고 .NET 데스크톱 개발 워크로�
 
 Debug 빌드의 실행 파일은 `MALL-WAY/bin/Debug/net48/win-x64/MALL-WAY.exe`입니다. 다른 폴더에서 시연할 때는 설정과 라이브러리를 포함한 출력 폴더 전체를 복사합니다. 첫 실행에는 출력 폴더에 쓸 수 있어야 합니다.
 
+## 브랜치 운영
+
+- `main`에는 실행과 검증을 마친 작업을 반영합니다.
+- 개발은 `feature/development` 하나에서 계속 진행합니다. 요일별 진행 사항은 커밋으로 구분합니다.
+- 작업을 검증하면 `main`에서 `git merge --no-ff feature/development`로 병합합니다. GitHub에는 두 브랜치를 함께 올립니다.
+- 병합 후 `feature/development`로 돌아와 `git merge --ff-only main`으로 병합 결과를 가져온 뒤 다음 작업을 이어갑니다. 금요일 길찾기도 같은 브랜치에서 개발합니다.
+
 ## 수요일 구현
 
 - WPF 화면은 MVVM Light의 ViewModel에 바인딩합니다. 앱 시작 시 SimpleIoc에 설정, DB 접근 클래스, ViewModel을 등록하고 CommonServiceLocator로 ViewModel을 가져옵니다.
