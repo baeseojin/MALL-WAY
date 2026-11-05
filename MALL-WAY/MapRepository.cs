@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Data.Sqlite;
+using GalaSoft.MvvmLight;
 
 namespace MallWay
 {
@@ -57,22 +58,7 @@ namespace MallWay
                     throw new InvalidDataException("설정에 지정한 키오스크 위치가 지도 DB에 없습니다.");
 
                 var map = new FloorMap { Name = name, KioskFloor = Convert.ToInt32(kioskFloor) };
-                command.CommandText = @"SELECT p.Name, p.Category, p.Area, p.Hours, p.X, p.Y, p.Width, p.Height
-                    FROM Places p JOIN Nodes n ON n.Id = p.EntranceNodeId
-                    WHERE n.Floor = $floor ORDER BY p.Y, p.X;";
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        map.Places.Add(new MapPlace
-                        {
-                            Name = reader.GetString(0), Category = reader.GetString(1),
-                            Area = reader.GetString(2), Hours = reader.GetString(3),
-                            X = reader.GetInt32(4), Y = reader.GetInt32(5),
-                            Width = reader.GetInt32(6), Height = reader.GetInt32(7)
-                        });
-                    }
-                }
+                map.Places.AddRange(ReadPlaces(connection, floor));
 
                 command.CommandText = @"SELECT Id, X, Y, Kind, Label FROM Nodes
                     WHERE Floor = $floor AND (Kind IN ('elevator', 'escalator') OR Id = $start);";
@@ -92,6 +78,58 @@ namespace MallWay
 
                 return map;
             }
+        }
+
+        public List<FloorInfo> ReadFloors()
+        {
+            var floors = new List<FloorInfo>();
+            using (var connection = Open(SqliteOpenMode.ReadOnly))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT Number, Name FROM Floors ORDER BY Number;";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                        floors.Add(new FloorInfo { Number = reader.GetInt32(0), Name = reader.GetString(1) });
+                }
+            }
+
+            return floors;
+        }
+
+        public List<MapPlace> ReadDirectory()
+        {
+            using (var connection = Open(SqliteOpenMode.ReadOnly))
+                return ReadPlaces(connection, null);
+        }
+
+        private static List<MapPlace> ReadPlaces(SqliteConnection connection, int? floor)
+        {
+            var places = new List<MapPlace>();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"SELECT p.Name, p.Category, p.Area, p.Hours, p.X, p.Y,
+                    p.Width, p.Height, p.EntranceNodeId, n.Floor
+                    FROM Places p JOIN Nodes n ON n.Id = p.EntranceNodeId
+                    WHERE ($floor IS NULL OR n.Floor = $floor) ORDER BY n.Floor, p.Y, p.X;";
+                command.Parameters.AddWithValue("$floor", (object)floor ?? DBNull.Value);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        places.Add(new MapPlace
+                        {
+                            Name = reader.GetString(0), Category = reader.GetString(1),
+                            Area = reader.GetString(2), Hours = reader.GetString(3),
+                            X = reader.GetInt32(4), Y = reader.GetInt32(5),
+                            Width = reader.GetInt32(6), Height = reader.GetInt32(7),
+                            EntranceNodeId = reader.GetString(8), Floor = reader.GetInt32(9)
+                        });
+                    }
+                }
+            }
+
+            return places;
         }
 
         private SqliteConnection Open(SqliteOpenMode mode)
@@ -121,8 +159,24 @@ namespace MallWay
         public List<MapMarker> Markers { get; } = new List<MapMarker>();
     }
 
-    public sealed class MapPlace
+    public sealed class FloorInfo
     {
+        public int Number { get; set; }
+        public string Name { get; set; }
+        public string Label => $"{Number}F  {Name}";
+    }
+
+    public sealed class MapPlace : ObservableObject
+    {
+        private bool isSelected;
+        public string EntranceNodeId { get; set; }
+        public int Floor { get; set; }
+        public string FloorLabel => $"{Floor}층 · {Area}";
+        public bool IsSelected
+        {
+            get => isSelected;
+            set => Set(ref isSelected, value);
+        }
         public string Name { get; set; }
         public string Category { get; set; }
         public string Area { get; set; }
