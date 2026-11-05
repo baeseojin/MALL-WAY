@@ -31,7 +31,7 @@ namespace MallWay
         public int CurrentFloor => currentFloor;
         public FloorMap Map => map;
         public List<MapPlace> SearchResults => searchResults;
-        public string ResultsSummary => $"전체 층 검색 결과 {SearchResults.Count}곳";
+        public string ResultsSummary => $"{SearchResults.Count}곳";
         public bool HasNoResults => SearchResults.Count == 0;
         public MapPlace SelectedPlace => selectedPlace;
         public bool HasSelection => SelectedPlace != null;
@@ -39,7 +39,7 @@ namespace MallWay
         public string ErrorMessage => errorMessage;
         public bool HasRoute => route != null;
         public string RouteSummary => HasRoute
-            ? $"{route.Start.Floor}층 → {route.Destination.Floor}층 · 총 이동 비용 {route.TotalCost}"
+            ? $"{route.Start.Floor}F → {route.Destination.Floor}F"
             : "";
         public List<string> RouteInstructions => route?.Instructions ?? new List<string>();
         public List<RouteStep> VisibleRouteSteps => route?.Steps.Where(step =>
