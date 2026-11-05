@@ -132,6 +132,44 @@ namespace MallWay
             return places;
         }
 
+        public RouteGraph ReadGraph()
+        {
+            var graph = new RouteGraph();
+            using (var connection = Open(SqliteOpenMode.ReadOnly))
+            using (var transaction = connection.BeginTransaction(deferred: true))
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = "SELECT Id, Floor, X, Y, Label FROM Nodes ORDER BY Id;";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var node = new RouteNode
+                        {
+                            Id = reader.GetString(0), Floor = reader.GetInt32(1),
+                            X = reader.GetInt32(2), Y = reader.GetInt32(3), Label = reader.GetString(4)
+                        };
+                        graph.Nodes.Add(node.Id, node);
+                    }
+                }
+                command.CommandText = "SELECT FromNodeId, ToNodeId, Cost, Kind FROM Edges ORDER BY FromNodeId, ToNodeId;";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        graph.Edges.Add(new RouteEdge
+                        {
+                            FromId = reader.GetString(0), ToId = reader.GetString(1),
+                            Cost = reader.GetInt32(2), Kind = reader.GetString(3)
+                        });
+                    }
+                }
+                transaction.Commit();
+            }
+            return graph;
+        }
+
         private SqliteConnection Open(SqliteOpenMode mode)
         {
             var connection = new SqliteConnection(new SqliteConnectionStringBuilder

@@ -19,6 +19,7 @@ namespace MallWay
                 ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
                 SimpleIoc.Default.Register(() => settings);
                 SimpleIoc.Default.Register(() => repository);
+                SimpleIoc.Default.Register<RouteService>();
                 SimpleIoc.Default.Register<MainViewModel>();
 
                 MainWindow = new MainWindow

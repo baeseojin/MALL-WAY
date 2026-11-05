@@ -182,6 +182,27 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding VisibleRouteSteps}" ItemsPanel="{StaticResource MapPanel}"
+                                      IsHitTestVisible="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Line X1="{Binding From.X}" Y1="{Binding From.Y}"
+                                          X2="{Binding To.X}" Y2="{Binding To.Y}"
+                                          Stroke="#087DB6" StrokeThickness="6"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding DestinationMarkers}" ItemsPanel="{StaticResource MapPanel}"
+                                      ItemContainerStyle="{StaticResource MapPosition}" IsHitTestVisible="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="16" Height="16" Fill="#087DB6" Stroke="White" StrokeThickness="3">
+                                        <Ellipse.RenderTransform><TranslateTransform X="-8" Y="-8" /></Ellipse.RenderTransform>
+                                    </Ellipse>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <ItemsControl ItemsSource="{Binding Map.Markers}" ItemsPanel="{StaticResource MapPanel}"
                                       ItemContainerStyle="{StaticResource MapPosition}" IsHitTestVisible="False">
                             <ItemsControl.ItemTemplate>
@@ -209,8 +230,13 @@
                     </Grid>
                 </Viewbox>
             </Border>
-            <TextBlock Grid.Row="3" Text="매장을 누르면 위치와 영업정보를 확인할 수 있습니다."
-                       Foreground="#526980" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap" />
+            <StackPanel Grid.Row="3" Margin="0,12,0,0">
+                <TextBlock Text="매장을 누르면 위치와 영업정보를 확인할 수 있습니다."
+                           Foreground="#526980" FontSize="12" TextWrapping="Wrap" />
+                <TextBlock Text="파란 선은 이 층의 이동 경로입니다. 층 버튼으로 다음 구간을 확인하세요."
+                           Foreground="#087DB6" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Visibility="{Binding HasRoute, Converter={StaticResource VisibleWhenTrue}}" />
+            </StackPanel>
             <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Foreground="#B92D3F" FontSize="13"
                        TextWrapping="Wrap" Margin="0,6,0,0" />
         </Grid>
@@ -238,10 +264,24 @@
                         <TextBlock Text="영업시간" Style="{StaticResource SidebarHeading}" Margin="0,16,0,5" />
                         <TextBlock Text="{Binding SelectedPlace.Hours}" Foreground="White" FontSize="16" />
                         <Button Content="길찾기" Style="{StaticResource TouchButton}" Margin="0,16,0,0"
-                                IsEnabled="False" ToolTip="경로 안내 준비 중" ToolTipService.ShowOnDisabled="True" />
-                        <TextBlock Text="경로 안내 준비 중" Foreground="#B8CFE1" FontSize="12" Margin="0,6,0,0" />
+                                Command="{Binding FindRouteCommand}" />
+
                     </StackPanel>
 
+                    <StackPanel Visibility="{Binding HasRoute, Converter={StaticResource VisibleWhenTrue}}" Margin="0,16,0,0">
+                        <TextBlock Text="목적지까지 이동 안내" Style="{StaticResource SidebarHeading}" />
+                        <TextBlock Text="{Binding RouteSummary}" Foreground="White" FontSize="13" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding RouteInstructions}" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Foreground="#D3E8F5" FontSize="14"
+                                               TextWrapping="Wrap" Margin="0,0,0,12" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="경로 지우기" Command="{Binding ClearRouteCommand}"
+                                Style="{StaticResource TouchButton}" />
+                    </StackPanel>
                     <TextBlock Text="편의시설 바로 찾기" Style="{StaticResource SidebarHeading}" Margin="0,28,0,10" />
                     <Button Content="화장실" Command="{Binding FindFacilityCommand}" CommandParameter="화장실"
                             Style="{StaticResource TouchButton}" Margin="0,0,0,8" />
@@ -256,6 +296,7 @@
 
                     <TextBlock Text="지도 범례" Style="{StaticResource SidebarHeading}" Margin="0,26,0,10" />
                     <TextBlock Text="●  현재 위치 (1층)" Foreground="#FF9AA4" Margin="0,0,0,8" />
+                    <TextBlock Text="━  이동 경로" Foreground="#65C8F4" Margin="0,0,0,8" />
                     <TextBlock Text="●  선택한 목적지" Foreground="#FFE3A8" Margin="0,0,0,8" />
                     <TextBlock Text="●  엘리베이터 · 에스컬레이터" Foreground="#C5D9E9" FontSize="12" />
                 </StackPanel>
