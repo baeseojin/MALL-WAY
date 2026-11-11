@@ -13,6 +13,8 @@ namespace MallWay
             try
             {
                 var settings = KioskSettings.Load();
+                DisplaySettings.Current.SetLanguage(false);
+                DisplaySettings.Current.SetLowVision(false);
                 var repository = new MapRepository(settings.DatabasePath);
                 repository.Initialize();
 

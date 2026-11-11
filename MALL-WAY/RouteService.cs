@@ -86,7 +86,7 @@ namespace MallWay
             return result;
         }
 
-        private static List<string> BuildInstructions(RouteResult route)
+        public static List<string> BuildInstructions(RouteResult route, bool english = false)
         {
             var instructions = new List<string>();
             for (var index = 0; index < route.Steps.Count; index++)
@@ -104,9 +104,13 @@ namespace MallWay
                 {
                     last = route.Steps[++index].To;
                 }
-                instructions.Add($"{step.From.Floor}F {step.From.Label} 탑승 → {last.Floor}F 하차");
+                instructions.Add(english
+                    ? $"Take {DisplaySettings.Current.EnglishText(step.From.Label)} from {step.From.Floor}F → get off at {last.Floor}F"
+                    : $"{step.From.Floor}F {step.From.Label} 탑승 → {last.Floor}F 하차");
             }
-            instructions.Add($"{route.Destination.Floor}F {route.Destination.Label} 도착");
+            instructions.Add(english
+                ? $"Arrive at {route.Destination.Floor}F · {DisplaySettings.Current.EnglishText(route.Destination.Label)}"
+                : $"{route.Destination.Floor}F {route.Destination.Label} 도착");
             return instructions;
         }
     }
