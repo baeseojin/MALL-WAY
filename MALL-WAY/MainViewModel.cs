@@ -22,16 +22,32 @@ namespace MallWay
         private MapPlace selectedPlace;
         private string errorMessage;
         private RouteResult route;
+        private bool isDetailOpen;
+
+        public bool IsDetailOpen
+        {
+            get => isDetailOpen;
+            private set { Set(ref isDetailOpen, value); RaisePropertyChanged(nameof(IsMapEnabled)); }
+        }
+        public bool IsMapEnabled => !IsDetailOpen;
+        public RelayCommand CloseDetailCommand { get; }
+        public RelayCommand OpenDetailCommand { get; }
+        public RelayCommand ToggleLanguageCommand { get; }
+        public RelayCommand ToggleLowVisionCommand { get; }
+        public string LanguageButtonLabel => DisplaySettings.Current.IsEnglish ? "한국어" : "English";
+        public string VisionButtonLabel => DisplaySettings.Current.Translate(DisplaySettings.Current.LowVision ? "일반 모드로" : "저시력 모드");
+        public bool LowVision => DisplaySettings.Current.LowVision;
 
         public string MallName { get; }
         public List<FloorInfo> Floors { get; }
         public List<string> Categories { get; }
         public string FloorTitle => $"{currentFloor}F  {Map.Name}";
-        public string KioskFloorLabel => $"{Map.KioskFloor}층 안내 키오스크";
+        public string KioskFloorLabel => DisplaySettings.Current.IsEnglish ? $"{Map.KioskFloor}F information kiosk" : $"{Map.KioskFloor}층 안내 키오스크";
         public int CurrentFloor => currentFloor;
         public FloorMap Map => map;
         public List<MapPlace> SearchResults => searchResults;
-        public string ResultsSummary => $"{SearchResults.Count}곳";
+        public string ResultsSummary => DisplaySettings.Current.IsEnglish
+            ? $"{SearchResults.Count} {(SearchResults.Count == 1 ? "result" : "results")}" : $"{SearchResults.Count}곳";
         public bool HasNoResults => SearchResults.Count == 0;
         public MapPlace SelectedPlace => selectedPlace;
         public bool HasSelection => SelectedPlace != null;
@@ -41,7 +57,7 @@ namespace MallWay
         public string RouteSummary => HasRoute
             ? $"{route.Start.Floor}F → {route.Destination.Floor}F"
             : "";
-        public List<string> RouteInstructions => route?.Instructions ?? new List<string>();
+        public List<string> RouteInstructions => route == null ? new List<string>() : RouteService.BuildInstructions(route, DisplaySettings.Current.IsEnglish);
         public List<RouteStep> VisibleRouteSteps => route?.Steps.Where(step =>
             step.From.Floor == currentFloor && step.To.Floor == currentFloor).ToList() ?? new List<RouteStep>();
         public List<RouteNode> DestinationMarkers => HasRoute && route.Destination.Floor == currentFloor
@@ -79,6 +95,11 @@ namespace MallWay
             this.settings = settings;
             this.repository = repository;
             this.routeService = routeService;
+            CloseDetailCommand = new RelayCommand(() => IsDetailOpen = false);
+            OpenDetailCommand = new RelayCommand(() => IsDetailOpen = HasSelection);
+            ToggleLanguageCommand = new RelayCommand(() => DisplaySettings.Current.SetLanguage(!DisplaySettings.Current.IsEnglish));
+            ToggleLowVisionCommand = new RelayCommand(() => DisplaySettings.Current.SetLowVision(!DisplaySettings.Current.LowVision));
+            DisplaySettings.Current.Changed += OnDisplayChanged;
             MallName = settings.MallName;
             Floors = repository.ReadFloors();
             directory = repository.ReadDirectory();
@@ -98,7 +119,10 @@ namespace MallWay
             SelectPlaceCommand = new RelayCommand<MapPlace>(place =>
             {
                 if (place != null && TryShowFloor(place.Floor))
+                {
                     SetSelection(place);
+                    IsDetailOpen = true;
+                }
             });
             FindFacilityCommand = new RelayCommand<string>(name => SetFilters(name, "편의시설"));
             ResetSearchCommand = new RelayCommand(() => SetFilters("", "전체"));
@@ -124,6 +148,7 @@ namespace MallWay
                 {
                     SetRoute(result);
                     UpdateHighlights();
+                    IsDetailOpen = false;
                 }
             }
             catch (Exception ex) when (ex is IOException || ex is InvalidDataException || ex is SqliteException)
@@ -168,7 +193,8 @@ namespace MallWay
             var query = SearchText.Trim();
             searchResults = directory.Where(place =>
                 (SelectedCategory == "전체" || place.Category == SelectedCategory)
-                && place.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                && (place.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
+                    || DisplaySettings.Current.EnglishText(place.Name).IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
             if (SelectedPlace != null && !searchResults.Any(place =>
                 place.EntranceNodeId == SelectedDestinationNodeId))
                 SetSelection(null);
@@ -181,6 +207,7 @@ namespace MallWay
         {
             SetRoute(null);
             selectedPlace = place;
+            if (place == null) IsDetailOpen = false;
             UpdateHighlights();
             Set(ref errorMessage, null, nameof(ErrorMessage));
             RaisePropertyChanged(nameof(SelectedPlace));
@@ -204,6 +231,24 @@ namespace MallWay
             RaisePropertyChanged(nameof(VisibleRouteSteps));
             RaisePropertyChanged(nameof(DestinationMarkers));
             ClearRouteCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OnDisplayChanged(object sender, EventArgs e)
+        {
+            foreach (var place in directory.Concat(Map.Places).Concat(new[] { selectedPlace }).Where(p => p != null).Distinct())
+                place.RefreshDisplay();
+            RaisePropertyChanged(nameof(LanguageButtonLabel));
+            RaisePropertyChanged(nameof(VisionButtonLabel));
+            RaisePropertyChanged(nameof(LowVision));
+            RaisePropertyChanged(nameof(ResultsSummary));
+            RaisePropertyChanged(nameof(KioskFloorLabel));
+            RaisePropertyChanged(nameof(RouteInstructions));
+        }
+
+        public override void Cleanup()
+        {
+            DisplaySettings.Current.Changed -= OnDisplayChanged;
+            base.Cleanup();
         }
     }
 }

@@ -209,7 +209,9 @@ namespace MallWay
         private bool isSelected;
         public string EntranceNodeId { get; set; }
         public int Floor { get; set; }
-        public string FloorLabel => $"{Floor}층 · {Area}";
+        public string FloorLabel => DisplaySettings.Current.IsEnglish
+            ? $"{Floor}F · {DisplaySettings.Current.Translate(Area)}" : $"{Floor}층 · {Area}";
+        public void RefreshDisplay() => RaisePropertyChanged(nameof(FloorLabel));
         public bool IsSelected
         {
             get => isSelected;
